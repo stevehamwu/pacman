@@ -88,42 +88,61 @@ def depthFirstSearch(problem):
     """
 
     "*** YOUR CODE HERE ***"
-    from game import Directions
     from util import Stack
-    s = Directions.SOUTH
-    w = Directions.WEST
-    n = Directions.NORTH
-    e = Directions.EAST
-    stop = Directions.STOP
 
     state = problem.getStartState()
+    visited = [state]
     stack = Stack()
-    path = []
-    actions = []
-    stack.push((state, stop, 1))
-    print problem.getSuccessors(state)
-    print "push " , (state, stop, 1)
+    stack.push((state, "Stop", 1))
     while not stack.isEmpty():
         state = stack.pop()
-        path.append(state[0])
-        if problem.isGoalState(state):
+        stack.push(state)
+        if problem.isGoalState(state[0]):
             break
-        print "pop ", state
+        nowayflag = True
         for succ in problem.getSuccessors(state[0]):
-            if not succ[0] in path:
+            print succ
+            if not succ[0] in visited:
+                nowayflag = False
                 stack.push(succ)
-                print "push ", succ
+                visited.append(succ[0])
+                break
+        if nowayflag:
+            stack.pop()
+    actions = []
     while not stack.isEmpty():
         actions.append(stack.pop()[1])
-    print path
-    #while not problem.isGoalState(state):
-        
-    return [w]
+    actions.reverse()
+    return actions[1:]
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import Queue
+
+    state = problem.getStartState()
+    visited = [state]
+    queue = Queue()
+    queue.push((state, "Stop", 1))
+    while  not queue.isEmpty():
+        state = queue.pop()
+        queue.push(state)
+        if problem.isGoalState(state[0]):
+            break
+        nowayflag = True
+        for succ in problem.getSuccessors(state[0]):
+            if not succ[0] in visited:
+                nowayflag = False
+                queue.push(succ)
+                visited.append(succ[0])
+
+        if nowayflag:
+            queue.pop()
+    actions = []
+    while not queue.isEmpty():
+        actions.append(queue.pop()[1])
+    actions.reverse()
+    return actions[1:]        
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
