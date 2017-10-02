@@ -91,29 +91,31 @@ def depthFirstSearch(problem):
     from util import Stack
 
     state = problem.getStartState()
-    visited = [state]
+    visited = []
+    path_dict = {}    #path dictionary {next : last} i.e. {(4, 5) : (5, 5)}
+    act_dict = {}   #action dictionary {node : action} i.e. {(4, 5) : 'West'}
+    actions = []
     stack = Stack()
-    stack.push((state, "Stop", 1))
+    stack.push(state)
+
     while not stack.isEmpty():
         state = stack.pop()
-        stack.push(state)
-        if problem.isGoalState(state[0]):
+        if problem.isGoalState(state):
             break
-        nowayflag = True
-        for succ in problem.getSuccessors(state[0]):
-            print succ
-            if not succ[0] in visited:
-                nowayflag = False
-                stack.push(succ)
-                visited.append(succ[0])
-                break
-        if nowayflag:
-            stack.pop()
-    actions = []
-    while not stack.isEmpty():
-        actions.append(stack.pop()[1])
+        if state not in visited:
+            visited.append(state)
+            for succ in problem.getSuccessors(state):
+                if succ[0] not in visited:
+                    stack.push(succ[0])
+                    path_dict[succ[0]] = state
+                    act_dict[succ[0]] = succ[1]
+
+    while state in path_dict:
+        actions.append(act_dict[state])
+        state = path_dict[state]
     actions.reverse()
-    return actions[1:]
+    
+    return actions
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
@@ -121,28 +123,31 @@ def breadthFirstSearch(problem):
     from util import Queue
 
     state = problem.getStartState()
-    visited = [state]
-    queue = Queue()
-    queue.push((state, "Stop", 1))
-    while  not queue.isEmpty():
-        state = queue.pop()
-        queue.push(state)
-        if problem.isGoalState(state[0]):
-            break
-        nowayflag = True
-        for succ in problem.getSuccessors(state[0]):
-            if not succ[0] in visited:
-                nowayflag = False
-                queue.push(succ)
-                visited.append(succ[0])
-
-        if nowayflag:
-            queue.pop()
+    visited = []
+    path_dict = {}    #path dictionary {next : last} i.e. {(4, 5) : (5, 5)}
+    act_dict = {}   #action dictionary {node : action} i.e. {(4, 5) : 'West'}
     actions = []
-    while not queue.isEmpty():
-        actions.append(queue.pop()[1])
+    stack = Queue()
+    stack.push(state)
+
+    while not stack.isEmpty():
+        state = stack.pop()
+        if problem.isGoalState(state):
+            break
+        if state not in visited:
+            visited.append(state)
+            for succ in problem.getSuccessors(state):
+                if succ[0] not in visited:
+                    stack.push(succ[0])
+                    path_dict[succ[0]] = state
+                    act_dict[succ[0]] = succ[1]
+
+    while state in path_dict:
+        actions.append(act_dict[state])
+        state = path_dict[state]
     actions.reverse()
-    return actions[1:]        
+    
+    return actions
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
