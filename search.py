@@ -111,6 +111,7 @@ def depthFirstSearch(problem):
                     act_dict[succ[0]] = succ[1]
 
     while state in path_dict:
+        print state
         actions.append(act_dict[state])
         state = path_dict[state]
     actions.reverse()
@@ -123,35 +124,35 @@ def breadthFirstSearch(problem):
     from util import Queue
 
     state = problem.getStartState()
-    visited = []
+    visited = [state]
     path_dict = {}    #path dictionary {next : last} i.e. {(4, 5) : (5, 5)}
     act_dict = {}   #action dictionary {node : action} i.e. {(4, 5) : 'West'}
     actions = []
-    stack = Queue()
-    stack.push(state)
+    queue = Queue()
+    queue.push(state)
 
-    while not stack.isEmpty():
-        state = stack.pop()
+    while not queue.isEmpty():
+        state = queue.pop()
         if problem.isGoalState(state):
             break
-        if state not in visited:
-            visited.append(state)
-            for succ in problem.getSuccessors(state):
-                if succ[0] not in visited:
-                    stack.push(succ[0])
-                    path_dict[succ[0]] = state
-                    act_dict[succ[0]] = succ[1]
-
+        for succ in problem.getSuccessors(state):
+            if succ[0] not in visited:
+                visited.append(succ[0])
+                queue.push(succ[0])
+                path_dict[succ[0]] = state
+                act_dict[succ[0]] = succ[1]
+    print path_dict
+    print state
     while state in path_dict:
         actions.append(act_dict[state])
         state = path_dict[state]
     actions.reverse()
-    
     return actions
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
