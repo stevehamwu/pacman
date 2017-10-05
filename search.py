@@ -152,8 +152,23 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    
-    util.raiseNotDefined()
+    from util import PriorityQueue
+    state = problem.getStartState()
+    visited = []
+    pq = PriorityQueue()
+    actions = []
+    pq.push((state, actions), 0)
+    while not pq.isEmpty():
+        state, actions = pq.pop()
+        if problem.isGoalState(state):
+            break
+        if state not in visited:
+            for succ in problem.getSuccessors(state):
+                if succ[0] not in visited:
+                    cost = problem.getCostOfActions(actions + [succ[1]])
+                    pq.push((succ[0], actions + [succ[1]]), cost)
+        visited.append(state)
+    return actions
 
 def nullHeuristic(state, problem=None):
     """
@@ -165,8 +180,23 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    from util import PriorityQueue
+    state = problem.getStartState()
+    visited = []
+    pq = PriorityQueue()
+    actions = []
+    pq.push((state, actions), nullHeuristic(state, problem))
+    while not pq.isEmpty():
+        state, actions = pq.pop()
+        if problem.isGoalState(state):
+            break
+        if state not in visited:
+            for succ in problem.getSuccessors(state):
+                if succ[0] not in visited:
+                    cost = problem.getCostOfActions(actions + [succ[1]]) + nullHeuristic(succ[0], problem)
+                    pq.push((succ[0], actions + [succ[1]]), cost)
+        visited.append(state)
+    return actions
 
 # Abbreviations
 bfs = breadthFirstSearch
