@@ -44,7 +44,7 @@ class SearchProblem:
     def getSuccessors(self, state):
         """
           state: Search state
-
+=
         For a given state, this should return a list of triples, (successor,
         action, stepCost), where 'successor' is a successor to the current
         state, 'action' is the action required to get there, and 'stepCost' is
@@ -111,11 +111,10 @@ def depthFirstSearch(problem):
                     act_dict[succ[0]] = succ[1]
 
     while state in path_dict:
-        print state
         actions.append(act_dict[state])
         state = path_dict[state]
     actions.reverse()
-    
+
     return actions
 
 def breadthFirstSearch(problem):
@@ -185,7 +184,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     visited = []
     pq = PriorityQueue()
     actions = []
-    pq.push((state, actions), nullHeuristic(state, problem))
+    pq.push((state, actions), heuristic(state, problem))
     while not pq.isEmpty():
         state, actions = pq.pop()
         if problem.isGoalState(state):
@@ -193,7 +192,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         if state not in visited:
             for succ in problem.getSuccessors(state):
                 if succ[0] not in visited:
-                    cost = problem.getCostOfActions(actions + [succ[1]]) + nullHeuristic(succ[0], problem)
+                    cost = problem.getCostOfActions(actions + [succ[1]]) + heuristic(succ[0], problem)
                     pq.push((succ[0], actions + [succ[1]]), cost)
         visited.append(state)
     return actions
@@ -203,3 +202,35 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
+
+def greedySearch(problem, heuristic=nullHeuristic):
+    path = []
+    path_dict = {}
+    act_dict = {}
+    pq = util.PriorityQueue()
+
+    startstate = problem.getStartState()
+    visited = [startstate]
+    pq.push(startstate, heuristic(startstate))
+
+    while not pq.isEmpty():
+
+        state = pq.pop()
+        if problem.isGoalState(state):
+            break
+
+        for succ in problem.getSuccessors(state):
+            if succ[0] not in visited:
+                priority = heuristic(succ[0])
+                pq.push(succ[0], priority)
+                visited.append(succ[0])
+                path_dict[succ[0]] = state
+                act_dict[succ[0]] = succ[1]
+
+    while state in path_dict:
+        path.append(act_dict[state])
+        state = path_dict[state]
+    path.reverse()
+
+    return path

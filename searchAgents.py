@@ -295,14 +295,14 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition, self.corners)
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return not state[1]
 
     def getSuccessors(self, state):
         """
@@ -316,15 +316,28 @@ class CornersProblem(search.SearchProblem):
         """
 
         successors = []
-        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            # Add a successor state to the successor list if the action is legal
-            # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
-
-            "*** YOUR CODE HERE ***"
+        # for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+        #     # Add a successor state to the successor list if the action is legal
+        #     # Here's a code snippet for figuring out whether a new position hits a wall:
+        #     #   x,y = currentPosition
+        #     #   dx, dy = Actions.directionToVector(action)
+        #     #   nextx, nexty = int(x + dx), int(y + dy)
+        #     #   hitsWall = self.walls[nextx][nexty]
+        #
+        #     "*** YOUR CODE HERE ***"
+        #     x, y = state[0]
+        #     dx, dy = Actions.directionToVector(action)
+        #     nextx, nexty = int(x + dx), int(y + dy)
+        #     if not self.walls[nextx][nexty]:
+        #         corners = list(state[1])
+        #         if (nextx, nexty) in corners:
+        #             print corners
+        #             print (nextx, nexty)
+        #             print corners.remove((nextx, nexty))
+        #             nextState = ()
+        #         else:
+        #             nextState = ((nextx, nexty), corners)
+        #         successors.append((nextState, action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -454,7 +467,19 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    position, foodGrid = state
+    foodList = list(foodGrid.asList())
+    gs = problem.startingGameState
+
+    if not problem.heuristicInfo.get('foodDistanceGrid', False):
+        problem.heuristicInfo['foodDistanceGrid'] = {}
+
+    foodDistanceGrid = problem.heuristicInfo['foodDistanceGrid']
+
+    totalDistance = 0
+
+    if len(foodList) > 0:
+        return totalDistance
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -540,3 +565,50 @@ def mazeDistance(point1, point2, gameState):
     assert not walls[x2][y2], 'point2 is a wall: ' + str(point2)
     prob = PositionSearchProblem(gameState, start=point1, goal=point2, warn=False, visualize=False)
     return len(search.bfs(prob))
+
+def getDisatnce(state):
+    x,y = state[0]
+    foodGrid = state[1]
+    d = 1
+    while d< max(foodGrid.height,foodGrid.width):
+        lx,ly = [x-d,y-d]
+        rx,ry = [x+d,y+d]
+        if lx<0:lx=0
+        if ly<0:ly=0
+        if rx>foodGrid.width: rx=foodGrid.width
+        if ry>foodGrid.height:ry=foodGrid.height
+        for i in range(lx,rx):
+            for j in range(ly,ry):
+                if foodGrid.data[i][j]==True: # hava food
+                    return d
+        d += 1
+    return d
+
+def greedyHeuristic(state):
+    position, foodGrid = state
+    x, y = position
+    count = 0
+    distance = 0.0
+    grids = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    for grid in grids:
+        if x + grid[0] >= 0 and x + grid[0] < foodGrid.width and y + grid[1] >= 0 and y + grid[1] < foodGrid.height:
+            if foodGrid[x + grid[0]][y + grid[1]] == True:
+                count += 1
+    if state[1].count() > 0:
+        distance = getDisatnce(state)
+    return 1.5 * state[1].count() + 0.2 * count + 0.1 * distance
+
+def trivialFoodHeuistic(state, problem=None):
+    if state[1].count() == 0:
+        return 0
+    else:
+        return 1
+
+class TrivialAStarFoodSearchAgent(SearchAgent):
+    def __init__(self):
+        SearchAgent.__init__(self, 'aStarSearch', 'FoodSearchProblem', 'trivialFoodHeuistic')
+
+class GreedyFoodSearchAgent(SearchAgent):
+    "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
+    def __init__(self):
+        SearchAgent.__init__(self,'greedySearch','FoodSearchProblem','greedyHeuristic')
