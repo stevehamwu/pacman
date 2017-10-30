@@ -467,19 +467,36 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    position, foodGrid = state
-    foodList = list(foodGrid.asList())
-    gs = problem.startingGameState
+    foods = foodGrid.asList()
+    closestFood = None
+    furthestFoods = 0
 
-    if not problem.heuristicInfo.get('foodDistanceGrid', False):
-        problem.heuristicInfo['foodDistanceGrid'] = {}
+    for i in foods:
+        for j in foods:
+            if (i, j) in problem.heuristicInfo:
+                if problem.heuristicInfo[(i, j)] > furthestFoods:
+                    furthestFoods = problem.heuristicInfo[(i, j)]
+            elif (j, i) in problem.heuristicInfo:
+                if problem.heuristicInfo[(j, i)] > furthestFoods:
+                    furthestFoods = problem.heuristicInfo[(j, i)]
+            else:
+                problem.heuristicInfo[(i, j)] = util.manhattanDistance(i, j)
+                if problem.heuristicInfo[(i, j)] > furthestFoods:
+                    furthestFoods = problem.heuristicInfo[(i, j)]
 
-    foodDistanceGrid = problem.heuristicInfo['foodDistanceGrid']
+    for food in foods:
+        if (position, food) in problem.heuristicInfo:
+            if closestFood == None or closestFood > problem.heuristicInfo[(position, food)]:
+                closestFood = problem.heuristicInfo[(position, food)]
+        else:
+            problem.heuristicInfo[(position, food)] = mazeDistance(position, food, problem.startingGameState)
+            if closestFood == None or closestFood > problem.heuristicInfo[(position, food)]:
+                closestFood = problem.heuristicInfo[(position, food)]
 
-    totalDistance = 0
+    if closestFood is None:
+        closestFood = 0
 
-    if len(foodList) > 0:
-        return totalDistance
+    return closestFood + furthestFoods
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
